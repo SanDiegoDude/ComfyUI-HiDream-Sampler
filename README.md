@@ -90,6 +90,9 @@ Recommended to install Flash Attention, but not required. Falls back to SDPA and
     ```bash
     pip install -r requirements.txt
 
+    #optional if you want to use NF4 models
+    pip install optimum accelerate auto-gptq
+
 3. Restart ComfyUI.
 
 ## Usage
