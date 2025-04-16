@@ -574,12 +574,22 @@ class HiDreamSampler:
         # Resolution options
         aspect_ratio_options = [
             "1:1 (1024×1024)",
-            "9:16 (768×1360)",
-            "16:9 (1360×768)",
-            "3:4 (880×1168)",
-            "4:3 (1168×880)",
-            "3:2 (1248×832)",
-            "2:3 (832×1248)"
+            "1:1 Medium (1280×1280)",
+            "1:1 Large (1536×1536)",
+            "2:3 Portrait (1088×1632)",
+            "3:2 Landscape (1632×1088)",
+            "4:5 Portrait (1024×1280)",
+            "5:4 Landscape (1280×1024)",
+            "4:3 Landscape (1536×1152)",
+            "3:4 Portrait (1152×1536)",
+            "16:9 Landscape (1600×896)",
+            "9:16 Portrait (896×1600)",
+            "9:10 Portrait (864×960)",
+            "10:9 Landscape (960×864)",
+            "3:1 Landscape (1536×512)",
+            "1:3 Portrait (512×1536)",
+            "4:1 Landscape (1600×400)",
+            "1:4 Portrait (400×1600)",
         ]
         
         return {
@@ -842,12 +852,20 @@ class HiDreamSamplerAdvanced:
         # Resolution options
         aspect_ratio_options = [
             "1:1 (Square Reso)",
-            "9:16 (768×1360)",
-            "16:9 (1360×768)",
-            "3:4 (880×1168)",
-            "4:3 (1168×880)",
-            "3:2 (1248×832)",
-            "2:3 (832×1248)",
+            "2:3 Portrait (1088×1632)",
+            "3:2 Landscape (1632×1088)",
+            "4:5 Portrait (1024×1280)",
+            "5:4 Landscape (1280×1024)",
+            "4:3 Landscape (1536×1152)",
+            "3:4 Portrait (1152×1536)",
+            "16:9 Landscape (1600×896)",
+            "9:16 Portrait (896×1600)",
+            "9:10 Portrait (864×960)",
+            "10:9 Landscape (960×864)",
+            "3:1 Landscape (1536×512)",
+            "1:3 Portrait (512×1536)",
+            "4:1 Landscape (1600×400)",
+            "1:4 Portrait (400×1600)",
             "Custom"
         ]
         
