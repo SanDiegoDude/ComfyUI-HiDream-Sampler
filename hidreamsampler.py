@@ -576,20 +576,20 @@ class HiDreamSampler:
             "1:1 (1024×1024)",
             "1:1 Medium (1280×1280)",
             "1:1 Large (1536×1536)",
-            "2:3 Portrait (1088×1632)",
-            "3:2 Landscape (1632×1088)",
-            "4:5 Portrait (1024×1280)",
-            "5:4 Landscape (1280×1024)",
+            "2:3 Portrait (896×1344)",
+            "3:2 Landscape (1344×896)",
+            "4:5 Portrait (896×1120)",
+            "5:4 Landscape (1120×896)",
             "4:3 Landscape (1536×1152)",
             "3:4 Portrait (1152×1536)",
             "16:9 Landscape (1600×896)",
             "9:16 Portrait (896×1600)",
-            "9:10 Portrait (864×960)",
-            "10:9 Landscape (960×864)",
+            "9:10 Portrait (832×960)",
+            "10:9 Landscape (960×832)",
             "3:1 Landscape (1536×512)",
             "1:3 Portrait (512×1536)",
-            "4:1 Landscape (1600×400)",
-            "1:4 Portrait (400×1600)",
+            "4:1 Landscape (1600×416)",
+            "1:4 Portrait (416×1600)",
         ]
         
         return {
@@ -612,8 +612,8 @@ class HiDreamSampler:
         width, height = HiDreamSampler.parse_aspect_ratio(aspect_ratio)
         print(f"Using resolution: {width}×{height} from aspect ratio: {aspect_ratio}")
         # Make dimensions divisible by 16
-        width = (width // 16) * 16
-        height = (height // 16) * 16
+        width = (width // 64) * 64
+        height = (height // 64) * 64
         # Monitor initial memory usage
         if torch.cuda.is_available():
             initial_mem = torch.cuda.memory_allocated() / 1024**2
@@ -852,20 +852,20 @@ class HiDreamSamplerAdvanced:
         # Resolution options
         aspect_ratio_options = [
             "1:1 (Square Reso)",
-            "2:3 Portrait (1088×1632)",
-            "3:2 Landscape (1632×1088)",
-            "4:5 Portrait (1024×1280)",
-            "5:4 Landscape (1280×1024)",
+            "2:3 Portrait (896×1344)",
+            "3:2 Landscape (1344×896)",
+            "4:5 Portrait (896×1120)",
+            "5:4 Landscape (1120×896)",
             "4:3 Landscape (1536×1152)",
             "3:4 Portrait (1152×1536)",
             "16:9 Landscape (1600×896)",
             "9:16 Portrait (896×1600)",
-            "9:10 Portrait (864×960)",
-            "10:9 Landscape (960×864)",
+            "9:10 Portrait (832×960)",
+            "10:9 Landscape (960×832)",
             "3:1 Landscape (1536×512)",
             "1:3 Portrait (512×1536)",
-            "4:1 Landscape (1600×400)",
-            "1:4 Portrait (400×1600)",
+            "4:1 Landscape (1600×416)",
+            "1:4 Portrait (416×1600)",
             "Custom"
         ]
         
@@ -894,9 +894,9 @@ class HiDreamSamplerAdvanced:
                 "openclip_weight": ("FLOAT", {"default": 1.0, "min": 0.0, "max": 5.0, "step": 0.1}),
                 "t5_weight": ("FLOAT", {"default": 1.0, "min": 0.0, "max": 5.0, "step": 0.1}),
                 "llama_weight": ("FLOAT", {"default": 1.0, "min": 0.0, "max": 5.0, "step": 0.1}),
-                "square_resolution": ("INT", {"default": 1024, "min": 512, "max": 3072, "step": 16}),
-                "custom_width": ("INT", {"default": 1024, "min": 512, "max": 3072, "step": 16}),
-                "custom_height": ("INT", {"default": 1024, "min": 512, "max": 3072, "step": 16}),
+                "square_resolution": ("INT", {"default": 1024, "min": 512, "max": 3072, "step": 64}),
+                "custom_width": ("INT", {"default": 1024, "min": 512, "max": 3072, "step": 64}),
+                "custom_height": ("INT", {"default": 1024, "min": 512, "max": 3072, "step": 64}),
                 "max_length_clip_l": ("INT", {"default": 77, "min": 64, "max": 218}),
                 "max_length_openclip": ("INT", {"default": 77, "min": 64, "max": 218}),
                 "max_length_t5": ("INT", {"default": 128, "min": 64, "max": 512}),
@@ -937,8 +937,8 @@ class HiDreamSamplerAdvanced:
             print(f"Using resolution: {width}×{height} from aspect ratio: {aspect_ratio}")
         
         # Make width and height divisible by 16
-        width = (width // 16) * 16
-        height = (height // 16) * 16
+        width = (width // 64) * 64
+        height = (height // 64) * 64
         
         # Monitor initial memory usage
         if torch.cuda.is_available():
@@ -1074,8 +1074,8 @@ class HiDreamSamplerAdvanced:
                 
             print("Executing pipeline inference...")
             # Make width and height divisible by 16
-            width = (width // 16) * 16
-            height = (height // 16) * 16
+            width = (width // 64) * 64
+            height = (height // 64) * 64
             
             # Use specific prompts for each encoder, falling back to primary prompt if empty
             prompt_clip_l = clip_l_prompt.strip() if clip_l_prompt.strip() else primary_prompt
