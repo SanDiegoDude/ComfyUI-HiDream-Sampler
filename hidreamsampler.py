@@ -601,9 +601,9 @@ class HiDreamSampler:
         # Parse resolution from aspect ratio using the static method
         width, height = HiDreamSampler.parse_aspect_ratio(aspect_ratio)
         print(f"Using resolution: {width}×{height} from aspect ratio: {aspect_ratio}")
-        # Make dimensions divisible by 64
-        width = (width // 64) * 64
-        height = (height // 64) * 64
+        # Make dimensions divisible by 16
+        width = (width // 16) * 16
+        height = (height // 16) * 16
         # Monitor initial memory usage
         if torch.cuda.is_available():
             initial_mem = torch.cuda.memory_allocated() / 1024**2
@@ -876,9 +876,9 @@ class HiDreamSamplerAdvanced:
                 "openclip_weight": ("FLOAT", {"default": 1.0, "min": 0.0, "max": 5.0, "step": 0.1}),
                 "t5_weight": ("FLOAT", {"default": 1.0, "min": 0.0, "max": 5.0, "step": 0.1}),
                 "llama_weight": ("FLOAT", {"default": 1.0, "min": 0.0, "max": 5.0, "step": 0.1}),
-                "square_resolution": ("INT", {"default": 1024, "min": 512, "max": 3072, "step": 64}),
-                "custom_width": ("INT", {"default": 1024, "min": 512, "max": 3072, "step": 64}),
-                "custom_height": ("INT", {"default": 1024, "min": 512, "max": 3072, "step": 64}),
+                "square_resolution": ("INT", {"default": 1024, "min": 512, "max": 3072, "step": 16}),
+                "custom_width": ("INT", {"default": 1024, "min": 512, "max": 3072, "step": 16}),
+                "custom_height": ("INT", {"default": 1024, "min": 512, "max": 3072, "step": 16}),
                 "max_length_clip_l": ("INT", {"default": 77, "min": 64, "max": 218}),
                 "max_length_openclip": ("INT", {"default": 77, "min": 64, "max": 218}),
                 "max_length_t5": ("INT", {"default": 128, "min": 64, "max": 512}),
@@ -918,9 +918,9 @@ class HiDreamSamplerAdvanced:
             width, height = self.parse_dimensions(aspect_ratio)
             print(f"Using resolution: {width}×{height} from aspect ratio: {aspect_ratio}")
         
-        # Make width and height divisible by 64
-        width = (width // 64) * 64
-        height = (height // 64) * 64
+        # Make width and height divisible by 16
+        width = (width // 16) * 16
+        height = (height // 16) * 16
         
         # Monitor initial memory usage
         if torch.cuda.is_available():
@@ -1055,9 +1055,9 @@ class HiDreamSamplerAdvanced:
                 print(f"Skipping pipe.to({inference_device}) (CPU offload enabled).")
                 
             print("Executing pipeline inference...")
-            # Make width and height divisible by 64
-            width = (width // 64) * 64
-            height = (height // 64) * 64
+            # Make width and height divisible by 16
+            width = (width // 16) * 16
+            height = (height // 16) * 16
             
             # Use specific prompts for each encoder, falling back to primary prompt if empty
             prompt_clip_l = clip_l_prompt.strip() if clip_l_prompt.strip() else primary_prompt
