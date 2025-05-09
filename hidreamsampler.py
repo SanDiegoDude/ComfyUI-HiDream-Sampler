@@ -1579,36 +1579,107 @@ class HiDreamImg2Img:
             traceback.print_exc()
             return (torch.zeros((1, h, w, 3)),)
 
+class HiDreamResolutionSelect:
+    # Store presets as a class variable for easy access
+    # Dimensions are (Width, Height) as commonly displayed, but will be returned as width, height
+    _RESOLUTION_PRESETS = {
+        "1:1 (Square Reso)": (1024, 1024), # Default assumption for this label
+        "1:2 Tablet (704 x 1408)": (704, 1408),
+        "2:1 Rectangle (1408 x 704)": (1408, 704),
+        "2:3 Portrait (704 x 1344)": (704, 1344),
+        "3:2 Landscape (1344 x 704)": (1344, 704),
+        "12:25 Poster (704 x 1472)": (704, 1472),
+        "25:12 Banner (1472 x 704)": (1472, 704),
+        "4:5 Classic (896 x 1120)": (896, 1120),
+        "5:4 Classic (1120 x 896)": (1120, 896),
+        "9:16 Portrait (768 x 1344)": (768, 1344),
+        "16:9 Widescreen (1344 x 768)": (1344, 768),
+        "1:3 Vertical Poster (576 x 1728)": (576, 1728),
+        "3:1 Panoramic (1728 x 576)": (1728, 576),
+        "1:4 Ultrawide (512 x 2048)": (512, 2048),
+        "4:1 Banner (2048 x 512)": (2048, 512),
+        "Custom Square": None  # Special marker for custom logic
+    }
+
+    CATEGORY = "HiDream" # Or "HiDream/Utils"
+    RETURN_TYPES = ("INT", "INT")
+    RETURN_NAMES = ("width", "height")
+    FUNCTION = "get_resolution"
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        preset_options = list(cls._RESOLUTION_PRESETS.keys())
+        return {
+            "required": {
+                "resolution_preset": (preset_options, {"default": preset_options[0]}),
+                "custom_square_size": ("INT", {
+                    "default": 1024,
+                    "min": 64,      # Smallest multiple of 64
+                    "max": 1536,    # Max specified
+                    "step": 64,     # In 64 chunks
+                    # "display": "number" # Optional: "slider" or "number"
+                }),
+            }
+        }
+
+    def get_resolution(self, resolution_preset, custom_square_size):
+        width, height = 1024, 1024  # Default fallback
+
+        if resolution_preset == "Custom Square":
+            # The INT widget with min, max, step should ensure custom_square_size is valid.
+            width = custom_square_size
+            height = custom_square_size
+            print(f"HiDreamResolutionSelect: Using Custom Square {width}x{height}")
+        else:
+            dimensions = self._RESOLUTION_PRESETS.get(resolution_preset)
+            if dimensions:
+                width, height = dimensions
+                print(f"HiDreamResolutionSelect: Using preset '{resolution_preset}' -> Width: {width}, Height: {height}")
+            else:
+                # This case should ideally not be reached if resolution_preset comes from the COMBO.
+                print(f"HiDreamResolutionSelect: Unknown preset '{resolution_preset}', defaulting to {width}x{height}.")
+        
+        # Note: All preset dimensions and custom_square_size are already multiples of 64.
+        # Downstream nodes (like the HiDream Samplers) might do (value // 64) * 64 again,
+        # which is harmless if the values are already compliant.
+        
+        return (width, height) # Return as (width, height)
+
 # --- Node Mappings ---
 NODE_CLASS_MAPPINGS = {
     "HiDreamSampler": HiDreamSampler,
     "HiDreamSamplerAdvanced": HiDreamSamplerAdvanced,
-    "HiDreamImg2Img": HiDreamImg2Img
+    "HiDreamImg2Img": HiDreamImg2Img,
+    "HiDreamResolutionSelect": HiDreamResolutionSelect # Added new node
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
     "HiDreamSampler": "HiDream Sampler",
     "HiDreamSamplerAdvanced": "HiDream Sampler (Advanced)",
-    "HiDreamImg2Img": "HiDream Image to Image"
+    "HiDreamImg2Img": "HiDream Image to Image",
+    "HiDreamResolutionSelect": "HiDream Resolution Select" # Added display name
 }
 
 # --- Register with ComfyUI's Memory Management ---
 try:
-    import comfy.model_management as model_management
+    # import comfy.model_management as model_management # Already imported
     
     # Check if we can register a cleanup callback
-    if hasattr(model_management, 'unload_all_models'):
-        original_unload = model_management.unload_all_models
-        
-        # Wrap the original function to include our cleanup
-        def wrapped_unload():
-            print("HiDream: ComfyUI is unloading all models, cleaning HiDream cache...")
-            HiDreamSampler.cleanup_models()
-            return original_unload()
+    if hasattr(comfy.model_management, 'unload_all_models'):
+        # Check if already wrapped to prevent double-wrapping if script reloads
+        if not hasattr(comfy.model_management.unload_all_models, '_hidream_wrapped'):
+            original_unload = comfy.model_management.unload_all_models
             
-        # Replace the original function with our wrapped version
-        model_management.unload_all_models = wrapped_unload
-        print("HiDream: Successfully registered with ComfyUI memory management")
+            def wrapped_unload():
+                print("HiDream: ComfyUI is unloading all models, cleaning HiDream cache...")
+                HiDreamSampler.cleanup_models() # Call the shared cleanup
+                return original_unload()
+            
+            wrapped_unload._hidream_wrapped = True # Mark as wrapped
+            comfy.model_management.unload_all_models = wrapped_unload
+            print("HiDream: Successfully registered with ComfyUI memory management")
+        else:
+            print("HiDream: Already registered with ComfyUI memory management.")
 except Exception as e:
     print(f"HiDream: Could not register cleanup with model_management: {e}")
 
